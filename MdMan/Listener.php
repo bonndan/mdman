@@ -7,9 +7,17 @@ use \phpDocumentor\Plugin\ListenerAbstract;
  */
 class MdMan_Listener extends ListenerAbstract
 {
-
+    /**
+     * suml annotations
+     */
     const SUML_BLOCK = "suml";
-
+    
+    /**
+     * The Pandoc / LateX sty file to use.
+     * @var string
+     */
+    const PANDOC_TEMPLATE_OPTION = 'pandoc-template';
+    
     /**
      * package => entries
      * @var array
@@ -71,7 +79,9 @@ class MdMan_Listener extends ListenerAbstract
 
         $tags = $docblock->getTagsByName(self::SUML_BLOCK);
         /* @var $tag \phpDocumentor\Reflection\DocBlock_Tag[] */
-        $tag = current($tags);
+        foreach ($tags as $tag) {
+            $suml = $tag->getContent();
+        }
     }
 
     /**
@@ -94,5 +104,22 @@ class MdMan_Listener extends ListenerAbstract
             }
         }
         file_put_contents($outDir . '/' . $outFile, $contents);
+    }
+    
+    /**
+     * Runs pandoc.
+     * 
+     * @phpdoc-event transformer.transform.pre
+     */
+    public function createPDFUsingPandoc()
+    {
+        $options = $this->plugin->getOptions();
+        $outDir  = isset($options['outDir']) ? $options['outDir'] : 'manual';
+        $outFile = isset($options['outFile']) ? $options['outFile'] : 'manual.md';
+        
+        $template = isset($options[self::PANDOC_TEMPLATE_OPTION]) ? 
+            '--template=' . $options[self::PANDOC_TEMPLATE_OPTION] : '';
+        
+        exec('cd ' .$outDir . ' && pandoc ' . $template . ' ' . $outFile . ' -o ' . $outFile . '.pdf');
     }
 }
