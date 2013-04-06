@@ -97,9 +97,9 @@ class MdMan_Listener extends ListenerAbstract
         
         $contents = '';
         foreach ($this->packages as $packageName => $package) {
-            $contents .= '# ' . $packageName . ' #' . PHP_EOL;
+            $contents .= PHP_EOL . PHP_EOL .'# ' . $packageName . ' #' . PHP_EOL;
             foreach ($package as $className => $class) {
-                $contents .= '## ' . $className . ' ##' . PHP_EOL;
+                $contents .= PHP_EOL . PHP_EOL . '## ' . trim($className, "\\") . ' ##' . PHP_EOL;
                 $contents .= $class;
             }
         }
