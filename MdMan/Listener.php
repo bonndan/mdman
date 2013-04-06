@@ -91,9 +91,8 @@ class MdMan_Listener extends ListenerAbstract
      */
     public function exportMarkdown()
     {
-        $options = $this->plugin->getOptions();
-        $outDir  = isset($options['outDir']) ? $options['outDir'] : 'manual';
-        $outFile = isset($options['outFile']) ? $options['outFile'] : 'manual.md';
+        $outDir  = $this->getOption('outDir','manual');
+        $outFile = $this->getOption('outFile','manual.md');
         
         $contents = '';
         foreach ($this->packages as $packageName => $package) {
@@ -113,13 +112,33 @@ class MdMan_Listener extends ListenerAbstract
      */
     public function createPDFUsingPandoc()
     {
-        $options = $this->plugin->getOptions();
-        $outDir  = isset($options['outDir']) ? $options['outDir'] : 'manual';
-        $outFile = isset($options['outFile']) ? $options['outFile'] : 'manual.md';
+        $outDir  = $this->getOption('outDir','manual');
+        $outFile = $this->getOption('outFile','manual.md');
         
-        $template = isset($options[self::PANDOC_TEMPLATE_OPTION]) ? 
-            '--template=' . $options[self::PANDOC_TEMPLATE_OPTION] : '';
+        $template = $this->getOption(self::PANDOC_TEMPLATE_OPTION) ? 
+            '--template=' . $this->getOption(self::PANDOC_TEMPLATE_OPTION) : '';
         
         exec('cd ' .$outDir . ' && pandoc ' . $template . ' ' . $outFile . ' -o ' . $outFile . '.pdf');
+    }
+    
+    /**
+     * Retrieves an option.
+     * 
+     * @param string $key
+     * @param mixed  $default
+     * @return string|null
+     */
+    protected function getOption($key, $default = null)
+    {
+        $options = $this->plugin->getOptions();
+        if (!isset($options[$key])) {
+            return $default;
+        }
+        
+        if ($options[$key] instanceof SimpleXMLElement) {
+            return $options[$key]->__toString();
+        }
+        
+        return $options[$key];
     }
 }
