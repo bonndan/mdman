@@ -2,7 +2,7 @@
 
 namespace MdMan;
 
-use phpDocumentor\Plugin\ListenerAbstract;
+use \phpDocumentor\Plugin\ListenerAbstract;
 
 /**
  * MdMan Listener
