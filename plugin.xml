@@ -12,6 +12,7 @@
     <class_prefix>MdMan</class_prefix>
     <listener>Listener</listener>
     <options>
-        <!--<option name="Option1">value</option>-->
+        <option name="outFile">manual.md</option>
+        <option name="generateToc">1</option>
     </options>
 </plugin>
