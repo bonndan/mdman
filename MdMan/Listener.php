@@ -1,6 +1,7 @@
 <?php
 
 use \phpDocumentor\Plugin\ListenerAbstract;
+use \phpDocumentor\Reflection\Event\PostDocBlockExtractionEvent;
 
 /**
  * MdMan Listener
@@ -33,7 +34,7 @@ class MdMan_Listener extends ListenerAbstract
      *
      * @return void
      */
-    public function fetchMarkdownFromClassDocBlock($data)
+    public function fetchMarkdownFromClassDocBlock(PostDocBlockExtractionEvent $data)
     {
         /* @var $element \phpDocumentor\Reflection\BaseReflector */
         $element = $data->getSubject();
