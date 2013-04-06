@@ -1,7 +1,5 @@
 <?php
 
-namespace MdMan;
-
 use \phpDocumentor\Plugin\ListenerAbstract;
 
 /**
