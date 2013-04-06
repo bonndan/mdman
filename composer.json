@@ -1,0 +1,14 @@
+{
+    "name": "bonndan/mdman",
+    "description": "PHPDoc2 plugin to generate markdown based user manuals",
+    "keywords": ["documentation", "phpdoc"],
+    "license": "MIT",
+    "autoload": {
+        "psr-0":{
+            "MdMan": ["src/bonndan/mdman"]
+        }
+    },
+    "require": {
+        "php": ">=5.3.3"
+    }
+}
