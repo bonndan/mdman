@@ -81,16 +81,15 @@ class MdMan_Listener extends ListenerAbstract
      */
     public function exportMarkdown()
     {
-        $config  = $this->plugin->getConfiguration();
-        $outDir  = $config->transformer->target;
         $options = $this->plugin->getOptions();
+        $outDir  = isset($options['outDir']) ? $options['outDir'] : 'manual';
         $outFile = isset($options['outFile']) ? $options['outFile'] : 'manual.md';
         
         $contents = '';
         foreach ($this->packages as $packageName => $package) {
             $contents .= '# ' . $packageName . ' #' . PHP_EOL;
             foreach ($package as $className => $class) {
-                $contents .= '# ' . $className . ' #' . PHP_EOL;
+                $contents .= '## ' . $className . ' ##' . PHP_EOL;
                 $contents .= $class;
             }
         }
