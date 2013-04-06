@@ -5,13 +5,19 @@
     "license": "MIT",
     "autoload": {
         "psr-0":{
-            "MdMan": ["src/"]
+            "MdMan": ["/"]
         }
     },
     "require": {
         "php": ">=5.3.3"
     },
     "require-dev": {
-        "phpdocumentor/phpdocumentor": "dev-develop"
+        "phpdocumentor/phpdocumentor": "dev-develop",
+        "nikic/php-parser": "0.9.*@dev",
+        "cilex/cilex": "1.0.*@dev",
+        "cilex/console-service-provider": "1.0.*@dev",
+        "phpdocumentor/graphviz": "1.0.0-beta3",
+        "phpdocumentor/reflection-docblock": "2.0.0a1",
+        "phpdocumentor/fileset": "1.0.0-beta2"
     }
 }
