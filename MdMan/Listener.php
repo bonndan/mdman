@@ -122,7 +122,7 @@ class MdMan_Listener extends ListenerAbstract
     }
     
     /**
-     * Retrieves an option.
+     * Retrieves a plugin option from the global configuration.
      * 
      * @param string $key
      * @param mixed  $default
@@ -130,15 +130,20 @@ class MdMan_Listener extends ListenerAbstract
      */
     protected function getOption($key, $default = null)
     {
-        $options = $this->plugin->getOptions();
-        if (!isset($options[$key])) {
-            return $default;
+        $config = $this->plugin->getConfiguration();
+        foreach ($config->plugins as $plugin) {
+            if ($plugin->path != 'vendor/bonndan/MdMan') {
+                continue;
+            }
+            
+            $option = $plugin->option;
+            foreach ($option as $opt) {
+                if ($opt->name == $key) {
+                    return $opt->value;
+                }
+            }
         }
         
-        if ($options[$key] instanceof SimpleXMLElement) {
-            return $options[$key]->__toString();
-        }
-        
-        return $options[$key];
+        return $default;
     }
 }
