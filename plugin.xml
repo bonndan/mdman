@@ -11,8 +11,4 @@
     </description>
     <class_prefix>MdMan</class_prefix>
     <listener>Listener</listener>
-    <options>
-        <option name="outFile">manual.md</option>
-        <option name="generateToc">1</option>
-    </options>
 </plugin>
