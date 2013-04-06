@@ -9,7 +9,7 @@
         A PHPDoc2 plugin to extra markdown from class doc blocks and merge them into one
         markdown file and then have them convert into LaTeX/PDF.
     </description>
-    <class-prefix>\MdMan</class-prefix>
+    <class_prefix>\MdMan</class_prefix>
     <listener>Listener</listener>
     <options>
         <!--<option name="Option1">value</option>-->
