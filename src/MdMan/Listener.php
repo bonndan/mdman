@@ -7,7 +7,7 @@ use \phpDocumentor\Plugin\ListenerAbstract;
 /**
  * MdMan Listener
  */
-class Listener extends ListenerAbstract
+class MdMan_Listener extends ListenerAbstract
 {
     
 }
