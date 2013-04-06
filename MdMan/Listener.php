@@ -118,7 +118,8 @@ class MdMan_Listener extends ListenerAbstract
         $template = $this->getOption(self::PANDOC_TEMPLATE_OPTION) ? 
             '--template=' . $this->getOption(self::PANDOC_TEMPLATE_OPTION) : '';
         
-        exec('cd ' .$outDir . ' && pandoc ' . $template . ' ' . $outFile . ' -o ' . $outFile . '.pdf');
+        $target = $outDir . '/' . $outFile;
+        exec('pandoc ' . $template . ' ' . $target . ' -o ' . $target . '.pdf');
     }
     
     /**
