@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor>
+    <parser>
+        <default-package-name>DefaultPackage</default-package-name>
+        <target>doc</target>
+    </parser>
+    <transformer>
+        <target>doc</target>
+    </transformer>
+    <files>
+        <directory>directory/to/scan</directory>
+        <ignore>tests/*</ignore>
+    </files>
+    <plugins>
+        <plugin path="vendor/bonndan/MdMan">
+            <option>
+                <name>outDir</name>
+                <value>manual</value>
+            </option>
+            <option>
+                <name>outFile</name>
+                <value>mymanual.md</value>
+            </option>
+            <option>
+                <name>pandoc-template</name>
+                <value>assets/head.sty</value>
+            </option>
+        </plugin>
+    </plugins>
+</phpdocumentor>
