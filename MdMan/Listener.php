@@ -1,10 +1,22 @@
 <?php
+/**
+ * Listener.php
+ * 
+ * @package MdMan
+ * @author  Daniel Pozzi <bonndan76@googlemail.com>
+ */
 
 use \phpDocumentor\Plugin\ListenerAbstract;
 use \phpDocumentor\Reflection\Event\PostDocBlockExtractionEvent;
 
 /**
  * MdMan Listener
+ * ==============
+ * 
+ * Listener which extracts Markdown from class docblocks.
+ * 
+ * @package MdMan
+ * @author  Daniel Pozzi <bonndan76@googlemail.com>
  */
 class MdMan_Listener extends ListenerAbstract
 {
@@ -20,11 +32,74 @@ class MdMan_Listener extends ListenerAbstract
     const PANDOC_TEMPLATE_OPTION = 'pandoc-template';
     
     /**
+     * name of the option which enables pandoc pdf generation
+     * @var string
+     */
+    const USE_PANDOC_OPTION = 'use-pandoc';
+    
+    /**
+     * output options names
+     */
+    const OUTDIR_OPTION = 'outDir';
+    const OUTFILE_OPTION = 'outFile';
+    
+    /**
+     * plugin path to identify the plugin, assumes composer installation
+     */
+    const CONFIG_PLUGIN_PATH = 'vendor/bonndan/MdMan';
+    const CONFIG_PLUGIN_OPTION_NAME = 'name';
+    const CONFIG_PLUGIN_OPTION_VALUE = 'value';
+    
+    /**
+     * configuration of the plugin
+     * @var \Zend\Config\Config
+     */
+    protected $pluginConfig = null;
+    
+    /**
+     * shell wrapper
+     * @var \Bart\Shell
+     */
+    protected $shell = null;
+    
+    /**
      * package => entries
      * @var array
      */
     protected $packages = array();
 
+    /**
+     * Constructor. Pass a shell wrapper for testing.
+     * 
+     * @param Plugin $plugin
+     * @param \Bart\Shell $shell
+     * @throws \LogicException
+     */
+    public function __construct($plugin, \Bart\Shell $shell = null)
+    {
+        parent::__construct($plugin);
+        
+        if ($shell === null) {
+            $shell = new \Bart\Shell();
+        }
+        $this->shell = $shell;
+        
+        /* @var $config \Zend\Config\Config */
+        $config = $this->plugin->getConfiguration();
+        foreach ($config->plugins as $plugin) {
+            if ($plugin->path == self::CONFIG_PLUGIN_PATH) {
+                $this->pluginConfig = $plugin;
+                break;
+            }
+        }
+        
+        if ($this->pluginConfig === null) {
+            throw new \LogicException(
+                'No plugin config found. At least outDir / outFile configuration is required.'
+            );
+        }
+    }
+    
     /**
      * Fetches markdown blocks from class docblocks.
      *
@@ -50,7 +125,13 @@ class MdMan_Listener extends ListenerAbstract
             $packages = $docblock->getTagsByName('package');
             $package  = current($packages)->getContent();
         }
-        $markDown = $docblock->getShortDescription() . PHP_EOL . $docblock->getLongDescription()->getContents();
+        $markDown = $docblock->getShortDescription() . PHP_EOL;
+        $longDesc = $docblock->getLongDescription();
+        if (is_object($longDesc)) {//api is unclear
+            $longDesc = $longDesc->getContents();
+        }
+        $markDown .= $longDesc . PHP_EOL;
+        
         $this->packages[$package][$class] = $markDown;
     }
 
@@ -92,9 +173,6 @@ class MdMan_Listener extends ListenerAbstract
      */
     public function exportMarkdown()
     {
-        $outDir  = $this->getOption('outDir','manual');
-        $outFile = $this->getOption('outFile','manual.md');
-        
         $contents = '';
         foreach ($this->packages as $packageName => $package) {
             $contents .= PHP_EOL . PHP_EOL .'# ' . $packageName . ' #' . PHP_EOL;
@@ -103,7 +181,13 @@ class MdMan_Listener extends ListenerAbstract
                 $contents .= $class;
             }
         }
-        file_put_contents($outDir . '/' . $outFile, $contents);
+        
+        $target = $this->getOutputTarget();
+        if(!is_writable($target)) {
+            throw new \LogicException($target . ' is not writable.');
+        }
+        
+        $this->shell->file_put_contents($target, $contents);
     }
     
     /**
@@ -113,14 +197,30 @@ class MdMan_Listener extends ListenerAbstract
      */
     public function createPDFUsingPandoc()
     {
-        $outDir  = $this->getOption('outDir','manual');
-        $outFile = $this->getOption('outFile','manual.md');
+        $usePandoc = $this->getOption(self::USE_PANDOC_OPTION);
+        if (!$usePandoc) {
+            return;
+        }
         
         $template = $this->getOption(self::PANDOC_TEMPLATE_OPTION) ? 
             '--template=' . $this->getOption(self::PANDOC_TEMPLATE_OPTION) : '';
         
+        $target = $this->getOutputTarget();
+        $this->shell->exec('pandoc ' . $template . ' ' . $target . ' -o ' . $target . '.pdf');
+    }
+    
+    /**
+     * Returns the path of the output target.
+     * 
+     * @return string
+     */
+    protected function getOutputTarget()
+    {
+        $outDir  = $this->getOption('outDir');
+        $outFile = $this->getOption('outFile');
         $target = $outDir . '/' . $outFile;
-        exec('pandoc ' . $template . ' ' . $target . ' -o ' . $target . '.pdf');
+        
+        return $target;
     }
     
     /**
@@ -132,16 +232,16 @@ class MdMan_Listener extends ListenerAbstract
      */
     protected function getOption($key, $default = null)
     {
+        /* @var $config \Zend\Config\Config */
         $config = $this->plugin->getConfiguration();
         foreach ($config->plugins as $plugin) {
-            if ($plugin->path != 'vendor/bonndan/MdMan') {
+            if ($plugin->path != self::CONFIG_PLUGIN_PATH) {
                 continue;
             }
-            
             $option = $plugin->option;
             foreach ($option as $opt) {
-                if ($opt->name == $key) {
-                    return $opt->value;
+                if ($opt->get(self::CONFIG_PLUGIN_OPTION_NAME) == $key) {
+                    return $opt->get(self::CONFIG_PLUGIN_OPTION_VALUE);
                 }
             }
         }

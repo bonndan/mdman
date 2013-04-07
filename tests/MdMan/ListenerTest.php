@@ -33,10 +33,22 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
     protected $eventDispatcher;
 
     /**
+     * config
+     * @var \Zend\Config\Config
+     */
+    protected $config;
+    
+    /**
      * subject of the event
      * @var \phpDocumentor\Reflection\ClassReflector 
      */
     protected $reflector;
+    
+    /**
+     * mock of the shell wrapper
+     * @var \Bart\Shell
+     */
+    protected $shellMock;
 
     /**
      * Setup
@@ -44,8 +56,7 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->createPlugin();
-        $this->listener = new MdMan_Listener($this->plugin);
+        $this->shellMock = $this->getMock("\Bart\Shell");
     }
 
     /**
@@ -60,6 +71,9 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
             ->method('getDefaultPackageName');
 
         $event = $this->createEvent($reflector);
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
         $this->listener->fetchMarkdownFromClassDocBlock($event);
     }
 
@@ -71,11 +85,109 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
         $docblock = $this->createDocblock();
         $docblock->expects($this->once())
             ->method('getShortDescription');
+        //$longDescription = new \phpDocumentor\Reflection\DocBlock\LongDescription();
+        $docblock->expects($this->once())
+            ->method('getLongDescription')
+            ->will($this->returnValue(null));
         
-        $event = $this->createEvent($docblock);
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        
+        $event = $this->createEvent(null, $docblock);
         $this->listener->fetchMarkdownFromClassDocBlock($event);
     }
 
+    /**
+     * Ensures a given config option is read properly
+     */
+    public function testReadsConfigurationOption()
+    {
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        $this->listener->exportMarkdown();
+    }
+    
+    /**
+     * Ensures the pandoc command is called.
+     */
+    public function testCreatePDFUsingPandoc()
+    {
+        $this->shellMock->expects($this->once())
+            ->method('exec')
+            ->with($this->equalTo('pandoc  /tmp/testfile.md -o /tmp/testfile.md.pdf'));
+        
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        $this->listener->createPDFUsingPandoc();
+    }
+    
+    /**
+     * Ensures the pandoc command is not called if the config disables it.
+     */
+    public function testCreatePDFUsingPandocDisabled()
+    {
+        $this->shellMock->expects($this->never())
+            ->method('exec');
+        $config = array(
+                'plugins' => array(
+                    'plugin' => array(
+                        'path' => MdMan_Listener::CONFIG_PLUGIN_PATH,
+                        'option' => array(
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTDIR_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => sys_get_temp_dir(),
+                            ),
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::USE_PANDOC_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => false,
+                            ),
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTFILE_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'testfile.md',
+                            ),
+                        )
+                    )
+                )
+            );
+        $this->createConfig($config);
+        $this->createPlugin();
+        $this->createListener();
+        $this->listener->createPDFUsingPandoc();
+    }
+    
+    /**
+     * Ensures only the plugin config is read.
+     */
+    public function testReadsConfigurationOnlyForOption()
+    {
+        
+        $config = array(
+            'plugins' => array(
+                'plugin' => array(
+                    'path' => 'some/other/path',
+                    'option' => array(
+                        array(
+                            MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTDIR_OPTION,
+                            MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => sys_get_temp_dir(),
+                        ),
+                        array(
+                            MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTFILE_OPTION,
+                            MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'testfile.md',
+                        ),
+                    )
+                )
+            )
+        );
+        
+        $this->createConfig($config);
+        $this->createPlugin();
+        
+        $this->setExpectedException('\LogicException');
+        $this->createListener();
+    }
 
     /**
      * Creates the plugin which is injected into the listener.
@@ -94,17 +206,48 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
             ->method('getEventDispatcher')
             ->will($this->returnValue($this->eventDispatcher));
 
-        $config = $this->getMockBuilder('Zend\Config\Config')
-            ->disableOriginalConstructor()
-            ->getMock();
         $this->plugin->expects($this->any())
             ->method('getConfiguration')
-            ->will($this->returnValue($config));
+            ->will($this->returnValue($this->config));
 
         $translator = $this->getMock('Zend\I18n\Translator\Translator');
         $this->plugin->expects($this->any())
             ->method('getTranslator')
             ->will($this->returnValue($translator));
+    }
+    
+    /**
+     * Create a config.
+     * 
+     * @param array $config
+     */
+    protected function createConfig(array $config = null)
+    {
+        if (null === $config) {
+            $config = array(
+                'plugins' => array(
+                    'plugin' => array(
+                        'path' => MdMan_Listener::CONFIG_PLUGIN_PATH,
+                        'option' => array(
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTDIR_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => sys_get_temp_dir(),
+                            ),
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::USE_PANDOC_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => true,
+                            ),
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTFILE_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'testfile.md',
+                            ),
+                        )
+                    )
+                )
+            );
+        }
+        
+        $this->config = new \Zend\Config\Config($config);
     }
 
     /**
@@ -134,8 +277,9 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
      */
     protected function createEvent($subject = null, $docBlock = null)
     {
-        if ($subject === null) {
-            $subject = $this->createReflector();
+        if ($subject == null) {
+            $this->createReflector();
+            $subject = $this->reflector;
         }
         $event = new PostDocBlockExtractionEvent($subject);
         $event->setDocblock($docBlock);
@@ -152,5 +296,13 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
         return $this->getMockBuilder('\phpDocumentor\Reflection\DocBlock')
             ->disableOriginalConstructor()
             ->getMock();
+    }
+    
+    /**
+     * Creates the tested Listener
+     */
+    protected function createListener()
+    {
+        $this->listener = new MdMan_Listener($this->plugin, $this->shellMock);
     }
 }
