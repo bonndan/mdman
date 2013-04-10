@@ -18,7 +18,7 @@ use \phpDocumentor\Reflection\Event\PostDocBlockExtractionEvent;
  * @package MdMan
  * @author  Daniel Pozzi <bonndan76@googlemail.com>
  */
-class MdMan_Listener extends ListenerAbstract
+class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree
 {
     /**
      * suml annotations
@@ -247,5 +247,15 @@ class MdMan_Listener extends ListenerAbstract
         }
         
         return $default;
+    }
+    
+    /**
+     * Returns the package/class tree of markdown contents.
+     * 
+     * @return array
+     */
+    public function getTree()
+    {
+        return $this->packages;
     }
 }

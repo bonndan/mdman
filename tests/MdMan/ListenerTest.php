@@ -190,6 +190,19 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Ensures the listener also implements the getTree methods for writers.
+     * 
+     */
+    public function testImplementsMarkdownTree()
+    {
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        $this->assertInstanceOf('MdMan_MarkdownTree', $this->listener);
+        $this->assertInternalType('array', $this->listener->getTree());
+    }
+    
+    /**
      * Creates the plugin which is injected into the listener.
      * 
      */
