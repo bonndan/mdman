@@ -14,6 +14,18 @@ interface MdMan_Configuration
     const PANDOC_TEMPLATE_OPTION = 'pandoc-template';
     
     /**
+     * Element that adds writers to the plugin.
+     * @var string
+     */
+    const WRITER_OPTION = 'writer';
+    
+    /**
+     * output options names
+     */
+    const OUTDIR_OPTION = 'outDir';
+    const OUTFILE_OPTION = 'outFile';
+    
+    /**
      * Returns a configuration option if available.
      * 
      * @param string $key
