@@ -22,9 +22,9 @@ interface MdMan_Writer
     public function setMarkdownTree(MdMan_MarkdownTree $tree);
     
     /**
-     * Execute the writer.
+     * Pass the configuration, execute the writer.
      * 
-     * 
+     * @param MdMan_Configuration $config
      */
-    public function execute();
+    public function execute(MdMan_Configuration $config);
 }
