@@ -33,7 +33,7 @@ abstract class MdMan_Writer_Abstract implements MdMan_Writer
     /**
      * Implement the execution function.
      * 
-     * 
+     * @param MdMan_Configuration $config
      */
-    abstract public function execute();
+    abstract public function execute(MdMan_Configuration $config);
 }
