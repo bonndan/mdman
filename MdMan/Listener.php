@@ -18,30 +18,12 @@ use \phpDocumentor\Reflection\Event\PostDocBlockExtractionEvent;
  * @package MdMan
  * @author  Daniel Pozzi <bonndan76@googlemail.com>
  */
-class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree
+class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdMan_Configuration
 {
     /**
      * suml annotations
      */
     const SUML_BLOCK = "suml";
-    
-    /**
-     * The Pandoc / LateX sty file to use.
-     * @var string
-     */
-    const PANDOC_TEMPLATE_OPTION = 'pandoc-template';
-    
-    /**
-     * name of the option which enables pandoc pdf generation
-     * @var string
-     */
-    const USE_PANDOC_OPTION = 'use-pandoc';
-    
-    /**
-     * output options names
-     */
-    const OUTDIR_OPTION = 'outDir';
-    const OUTFILE_OPTION = 'outFile';
     
     /**
      * plugin path to identify the plugin, assumes composer installation
@@ -171,56 +153,9 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree
      * 
      * @phpdoc-event transformer.transform.pre
      */
-    public function exportMarkdown()
+    public function runExports()
     {
-        $contents = '';
-        foreach ($this->packages as $packageName => $package) {
-            $contents .= PHP_EOL . PHP_EOL .'# ' . $packageName . ' #' . PHP_EOL;
-            foreach ($package as $className => $class) {
-                $contents .= PHP_EOL . PHP_EOL . '## ' . trim($className, "\\") . ' ##' . PHP_EOL;
-                $contents .= $class;
-            }
-        }
         
-        $target = $this->getOutputTarget();
-        if(!is_writable($target)) {
-            throw new \LogicException($target . ' is not writable.');
-        }
-        
-        $this->shell->file_put_contents($target, $contents);
-    }
-    
-    /**
-     * Runs pandoc.
-     * 
-     * @phpdoc-event transformer.transform.pre
-     */
-    public function createPDFUsingPandoc()
-    {
-        $usePandoc = $this->getOption(self::USE_PANDOC_OPTION);
-        if (!$usePandoc) {
-            return;
-        }
-        
-        $template = $this->getOption(self::PANDOC_TEMPLATE_OPTION) ? 
-            '--template=' . $this->getOption(self::PANDOC_TEMPLATE_OPTION) : '';
-        
-        $target = $this->getOutputTarget();
-        $this->shell->exec('pandoc ' . $template . ' ' . $target . ' -o ' . $target . '.pdf');
-    }
-    
-    /**
-     * Returns the path of the output target.
-     * 
-     * @return string
-     */
-    protected function getOutputTarget()
-    {
-        $outDir  = $this->getOption('outDir');
-        $outFile = $this->getOption('outFile');
-        $target = $outDir . '/' . $outFile;
-        
-        return $target;
     }
     
     /**
@@ -230,7 +165,7 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree
      * @param mixed  $default
      * @return string|null
      */
-    protected function getOption($key, $default = null)
+    public function getOption($key, $default = null)
     {
         /* @var $config \Zend\Config\Config */
         $config = $this->plugin->getConfiguration();

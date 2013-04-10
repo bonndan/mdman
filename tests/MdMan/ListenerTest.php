@@ -106,57 +106,8 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
         $this->createConfig();
         $this->createPlugin();
         $this->createListener();
-        $this->listener->exportMarkdown();
     }
     
-    /**
-     * Ensures the pandoc command is called.
-     */
-    public function testCreatePDFUsingPandoc()
-    {
-        $this->shellMock->expects($this->once())
-            ->method('exec')
-            ->with($this->equalTo('pandoc  /tmp/testfile.md -o /tmp/testfile.md.pdf'));
-        
-        $this->createConfig();
-        $this->createPlugin();
-        $this->createListener();
-        $this->listener->createPDFUsingPandoc();
-    }
-    
-    /**
-     * Ensures the pandoc command is not called if the config disables it.
-     */
-    public function testCreatePDFUsingPandocDisabled()
-    {
-        $this->shellMock->expects($this->never())
-            ->method('exec');
-        $config = array(
-                'plugins' => array(
-                    'plugin' => array(
-                        'path' => MdMan_Listener::CONFIG_PLUGIN_PATH,
-                        'option' => array(
-                            array(
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTDIR_OPTION,
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => sys_get_temp_dir(),
-                            ),
-                            array(
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::USE_PANDOC_OPTION,
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => false,
-                            ),
-                            array(
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTFILE_OPTION,
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'testfile.md',
-                            ),
-                        )
-                    )
-                )
-            );
-        $this->createConfig($config);
-        $this->createPlugin();
-        $this->createListener();
-        $this->listener->createPDFUsingPandoc();
-    }
     
     /**
      * Ensures only the plugin config is read.
@@ -243,15 +194,11 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
                         'path' => MdMan_Listener::CONFIG_PLUGIN_PATH,
                         'option' => array(
                             array(
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTDIR_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Configuration::OUTDIR_OPTION,
                                 MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => sys_get_temp_dir(),
                             ),
                             array(
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::USE_PANDOC_OPTION,
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => true,
-                            ),
-                            array(
-                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Listener::OUTFILE_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Configuration::OUTFILE_OPTION,
                                 MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'testfile.md',
                             ),
                         )
