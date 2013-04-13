@@ -33,13 +33,14 @@ abstract class MdMan_Writer_Abstract implements MdMan_Writer
     protected $shell;
     
     /**
-     * Returns an instance of itself.
+     * Returns an instance of the class given as param.
      * 
-     * @return MdMan_Writer_*
+     * @param $string $writerClass
+     * @return MdMan_Writer_Abstract
      */
-    public static function create()
+    public static function create($writerClass)
     {
-        return new static(new \Bart\Shell());
+        return new $writerClass(new \Bart\Shell());
     }
     
     /**

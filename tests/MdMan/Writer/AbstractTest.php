@@ -30,6 +30,15 @@ class MdMan_Writer_AbstractTest extends PHPUnit_Framework_TestCase
     }
     
     /**
+     * Ensures the create factory method returns a writer.
+     */
+    public function testCreate()
+    {
+        $res = MdMan_Writer_Abstract::create('MdMan_Writer_Markdown');
+        $this->assertInstanceOf('MdMan_Writer_Markdown', $res);
+    }
+    
+    /**
      * Ensures the config is present
      */
     public function testInjectConfig()
