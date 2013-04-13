@@ -27,7 +27,7 @@ class MdMan_Writer_ByPackageAndClass extends MdMan_Writer_Abstract
         foreach ($tree as $packageName => $package) {
             $contents .= PHP_EOL . PHP_EOL .'# ' . $packageName . ' #' . PHP_EOL;
             foreach ($package as $className => $class) {
-                $contents .= PHP_EOL . PHP_EOL . '## ' . trim($className, "\\") . ' ##' . PHP_EOL;
+                $contents .= PHP_EOL . PHP_EOL . '## ' . trim($className, "\\") . ' ##' . PHP_EOL . PHP_EOL;
                 $contents .= $this->getMarkdownWithDegradedHeadings($class);
             }
         }
