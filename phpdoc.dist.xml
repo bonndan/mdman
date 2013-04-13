@@ -22,8 +22,8 @@
                 <value>mymanual.md</value>
             </option>
             <option>
-                <name>pandoc-template</name>
-                <value>assets/head.sty</value>
+                <name>pandoc-options</name>
+                <value>--template=assets/head.sty --indented-code-classes=php,numberLines --highlight-style=tango -f markdown+lhs --listings</value>
             </option>
             <option>
                 <name>writer</name>
