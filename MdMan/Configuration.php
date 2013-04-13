@@ -8,10 +8,13 @@
 interface MdMan_Configuration
 {
     /**
-     * The Pandoc / LateX sty file to use.
-     * @var string
+     * pandoc command line call options
+     * <code>
+     * --indented-code-classes=php,numberLines --highlight-style=tango -f markdown+lhs --listings
+     * </code>
+     * @var string 
      */
-    const PANDOC_TEMPLATE_OPTION = 'pandoc-template';
+    const PANDOC_OPTIONS = 'pandoc-options';
     
     /**
      * Element that adds writers to the plugin.
