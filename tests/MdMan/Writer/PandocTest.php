@@ -41,7 +41,7 @@ class MdMan_Writer_PandocTest extends PHPUnit_Framework_TestCase
         $configMock = $this->getMock('MdMan_Configuration');
         $configMock->expects($this->at(0))
             ->method('getOption')
-            ->with(MdMan_Configuration::PANDOC_TEMPLATE_OPTION)
+            ->with(MdMan_Configuration::PANDOC_OPTIONS)
             ->will($this->returnValue(null));
         $configMock->expects($this->at(1))
             ->method('getOption')

@@ -9,6 +9,11 @@
 /**
  * The pandoc writer calls pandoc for pdf generation.
  * 
+ * Possible options for pandoc:
+ * 
+ * <code>
+ * --indented-code-classes=php,numberLines --highlight-style=tango -f markdown+lhs --listings
+ * </code>
  * @package MdMan
  * @author  Daniel Pozzi <bonndan76@googlemail.com>
  */
@@ -19,11 +24,10 @@ class MdMan_Writer_Pandoc extends MdMan_Writer_Abstract
      */
     public function execute()
     {
-        $template = $this->config->getOption(MdMan_Configuration::PANDOC_TEMPLATE_OPTION) ? 
-            '--template=' . $this->config->getOption(MdMan_Configuration::PANDOC_TEMPLATE_OPTION) : '';
+        $options = $this->config->getOption(MdMan_Configuration::PANDOC_OPTIONS);
         
         $target = $this->getOutputTarget();
-        $this->shell->exec('pandoc ' . $template . ' ' . $target . ' -o ' . $target . '.pdf');
+        $this->shell->exec('pandoc ' . $options . ' ' . $target . ' -o ' . $target . '.pdf');
     }
 
 }
