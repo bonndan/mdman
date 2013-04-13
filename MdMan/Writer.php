@@ -15,11 +15,6 @@
 interface MdMan_Writer
 {
     /**
-     * Factory method.
-     */
-    public static function create();
-    
-    /**
      * Inject a markdown tree.
      * 
      * @param MdMan_MarkdownTree $tree
