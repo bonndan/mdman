@@ -154,6 +154,24 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
     }
     
     /**
+     * Ensures all configured writers are executed.
+     */
+    public function testRunExports()
+    {
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        $this->listener->runExports();
+        
+        $writers = $this->listener->getWriters();
+        $this->assertEquals(1, count($writers));
+        
+        $mock = current($writers);
+        $this->assertInstanceOf('WriterMock', $mock);
+        $this->assertTrue($mock->executed);
+    }
+    
+    /**
      * Creates the plugin which is injected into the listener.
      * 
      */
@@ -200,6 +218,14 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
                             array(
                                 MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Configuration::OUTFILE_OPTION,
                                 MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'testfile.md',
+                            ),
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Configuration::WRITER_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'WriterMock',
+                            ),
+                            array(
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_NAME => MdMan_Configuration::WRITER_OPTION,
+                                MdMan_Listener::CONFIG_PLUGIN_OPTION_VALUE => 'WriterMock',
                             ),
                         )
                     )
@@ -264,5 +290,30 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
     protected function createListener()
     {
         $this->listener = new MdMan_Listener($this->plugin, $this->shellMock);
+    }
+}
+
+/**
+ * Mock for testing.
+ */
+class WriterMock implements MdMan_Writer
+{
+    public $executed;
+    public $config;
+    public $tree;
+    
+    public function execute()
+    {
+        $this->executed = true;
+    }
+
+    public function setConfig(\MdMan_Configuration $config)
+    {
+        $this->config = $config;
+    }
+
+    public function setMarkdownTree(\MdMan_MarkdownTree $tree)
+    {
+        $this->tree = $tree;
     }
 }

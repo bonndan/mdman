@@ -1,3 +1,4 @@
+
 <?php
 /**
  * Listener.php
@@ -10,8 +11,7 @@ use \phpDocumentor\Plugin\ListenerAbstract;
 use \phpDocumentor\Reflection\Event\PostDocBlockExtractionEvent;
 
 /**
- * MdMan Listener
- * ==============
+ * # MdMan Listener #
  * 
  * Listener which extracts Markdown from class docblocks.
  * 
@@ -50,6 +50,12 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
      */
     protected $packages = array();
 
+    /**
+     * Writers for markdown export.
+     * @var array
+     */
+    protected $writers = array();
+    
     /**
      * Constructor. Pass a shell wrapper for testing.
      * 
@@ -149,13 +155,21 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
     }
 
     /**
-     * Dumps the packages before transformation.
+     * Loads all the configured writer in the given sequence and executes them.
      * 
      * @phpdoc-event transformer.transform.pre
      */
     public function runExports()
     {
-        
+        $writers = $this->getConfiguredWriters();
+        foreach ($writers as $writerName) {
+            $writer = MdMan_Writer_Abstract::create($writerName);
+            $this->writers[$writerName] = $writer;
+            
+            $this->writers[$writerName]->setConfig($this);
+            $this->writers[$writerName]->setMarkdownTree($this);
+            $this->writers[$writerName]->execute();
+        }
     }
     
     /**
@@ -167,25 +181,30 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
      */
     public function getOption($key, $default = null)
     {
-        /* @var $config \Zend\Config\Config */
-        $config = $this->plugin->getConfiguration();
-        if ($config->plugins === null) {
-            return $default;
-        }
-        
-        foreach ($config->plugins as $plugin) {
-            if ($plugin->path != self::CONFIG_PLUGIN_PATH) {
-                continue;
-            }
-            $option = $plugin->option;
-            foreach ($option as $opt) {
-                if ($opt->get(self::CONFIG_PLUGIN_OPTION_NAME) == $key) {
-                    return $opt->get(self::CONFIG_PLUGIN_OPTION_VALUE);
-                }
+        foreach ($this->pluginConfig->option as $option) {
+            if ($option->get(self::CONFIG_PLUGIN_OPTION_NAME) == $key) {
+                return $option->get(self::CONFIG_PLUGIN_OPTION_VALUE);
             }
         }
         
         return $default;
+    }
+    
+    /**
+     * Returns the class names of the configured writers.
+     * 
+     * @return string[]
+     */
+    protected function getConfiguredWriters()
+    {
+        $writers = array();
+        foreach ($this->pluginConfig->option as $option) {
+            if ($option->get(self::CONFIG_PLUGIN_OPTION_NAME) == MdMan_Configuration::WRITER_OPTION) {
+                $writers[] = $option->get(self::CONFIG_PLUGIN_OPTION_VALUE);
+            }
+        }
+        
+        return $writers;
     }
     
     /**
@@ -196,5 +215,15 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
     public function getTree()
     {
         return $this->packages;
+    }
+    
+    /**
+     * Returns the used writers (non-empty after runExport has been called).
+     * 
+     * @return array
+     */
+    public function getWriters()
+    {
+        return $this->writers;
     }
 }
