@@ -169,6 +169,10 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
     {
         /* @var $config \Zend\Config\Config */
         $config = $this->plugin->getConfiguration();
+        if ($config->plugins === null) {
+            return $default;
+        }
+        
         foreach ($config->plugins as $plugin) {
             if ($plugin->path != self::CONFIG_PLUGIN_PATH) {
                 continue;
