@@ -13,7 +13,7 @@
         "box/bart" : "dev-master"
     },
     "require-dev": {
-        "phpdocumentor/phpdocumentor": "dev-develop",
+        "phpdocumentor/phpdocumentor": "dev-master",
         "nikic/php-parser": "0.9.*@dev",
         "cilex/cilex": "1.0.*@dev",
         "cilex/console-service-provider": "1.0.*@dev",
