@@ -36,7 +36,7 @@ class MdMan_Writer_MarkdownTest extends PHPUnit_Framework_TestCase
     {
         $this->shellMock->expects($this->once())
             ->method('file_put_contents')
-            ->with($this->contains('testfile.md'));
+            ->with('/tmp/testfile.md');
         
         $configMock = $this->getMock('MdMan_Configuration');
         $configMock->expects($this->at(0))

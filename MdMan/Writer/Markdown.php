@@ -7,7 +7,7 @@
  */
 
 /**
- * The writer that generates one markdown file.
+ * The writer that generates one markdown file without modifying the contents.
  * 
  * @package MdMan
  * @author  Daniel Pozzi <bonndan76@googlemail.com>
@@ -23,11 +23,9 @@ class MdMan_Writer_Markdown extends MdMan_Writer_Abstract
     {
         $contents = '';
         $tree = $this->tree->getTree();
-        foreach ($tree as $packageName => $package) {
-            $contents .= PHP_EOL . PHP_EOL .'# ' . $packageName . ' #' . PHP_EOL;
-            foreach ($package as $className => $class) {
-                $contents .= PHP_EOL . PHP_EOL . '## ' . trim($className, "\\") . ' ##' . PHP_EOL;
-                $contents .= $class;
+        foreach ($tree as $package) {
+            foreach ($package as $class) {
+                $contents .= PHP_EOL . $class;
             }
         }
         
