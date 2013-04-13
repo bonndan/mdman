@@ -8,7 +8,8 @@
 
 /**
  * The writer that degrades the class markdown headings by two levels (to match
- * the automatically inserted
+ * the automatically inserted headings). It also discards any markdown inserted
+ * before the first class markdown heading.
  * 
  * @package MdMan
  * @author  Daniel Pozzi <bonndan76@googlemail.com>
@@ -44,11 +45,25 @@ class MdMan_Writer_ByPackageAndClass extends MdMan_Writer_Abstract
      */
     protected function getMarkdownWithDegradedHeadings($content)
     {
+        $content = $this->clip($content);
+        
         $pattern     = "/( ?)(#{1,})( ?)/";
         $replacement = "$1#$2#$3";
         
-        $content = preg_replace($pattern, $replacement, $content);
+        return preg_replace($pattern, $replacement, $content);
+    }
+
+    /**
+     * Discards any content before the first hash.
+     * 
+     * @param string $content
+     * @return string
+     */
+    protected function clip($content)
+    {
+        /* if the strpos is false, is is treated as zero */
+        $firstHash = (int)strpos($content, '#');
         
-        return $content;
+        return PHP_EOL . substr($content, $firstHash);
     }
 }

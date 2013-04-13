@@ -67,6 +67,8 @@ class MdMan_Writer_ByPackageAndClassTest extends PHPUnit_Framework_TestCase
     protected function getMarkdown()
     {
         return "
+Some description            
+
 # heading1 #
 
 some text
