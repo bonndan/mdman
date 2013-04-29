@@ -18,7 +18,7 @@ use \phpDocumentor\Reflection\Event\PostDocBlockExtractionEvent;
  * @package MdMan
  * @author  Daniel Pozzi <bonndan76@googlemail.com>
  */
-class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdMan_Configuration
+class MdMan_Listener extends ListenerAbstract implements MdMan_ContentProvider, MdMan_Configuration
 {
     /**
      * suml annotations
@@ -52,9 +52,21 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
 
     /**
      * Writers for markdown export.
-     * @var array
+     * @var MdMan_Writer[]
      */
     protected $writers = array();
+    
+    /**
+     * collected tag blocks
+     * @var \phpDocumentor\Reflection\DocBlock\Tag[]
+     */
+    protected $tags = array();
+    
+    /**
+     * tags to collect
+     * @var string[]
+     */
+    protected $collectedTagNames = array();
     
     /**
      * Constructor. Pass a shell wrapper for testing.
@@ -86,10 +98,26 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
                 'No plugin config found. At least outDir / outFile configuration is required.'
             );
         }
+        
+        $this->createWriters();
     }
     
     /**
-     * Fetches markdown blocks from class docblocks.
+     * Initializes the configured writers.
+     */
+    protected function createWriters()
+    {
+        $writers = $this->getConfiguredWriters();
+        foreach ($writers as $writerName) {
+            $writer = MdMan_Writer_Abstract::create($writerName);
+            $this->writers[$writerName] = $writer;
+            $this->writers[$writerName]->setConfig($this);
+            $this->writers[$writerName]->setContentProvider($this);
+        }
+    }
+    
+    /**
+     * Hook for class docblock extraction.
      *
      * @param PostDocBlockExtractionEvent $data Event object 
      *
@@ -97,13 +125,27 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
      *
      * @return void
      */
-    public function fetchMarkdownFromClassDocBlock(PostDocBlockExtractionEvent $data)
+    public function handleClassBlockExtraction(PostDocBlockExtractionEvent $data)
     {
         /* @var $element \phpDocumentor\Reflection\BaseReflector */
         $element = $data->getSubject();
         if (!$element instanceof \phpDocumentor\Reflection\ClassReflector) {
             return;
         }
+        
+        $this->fetchMarkdownFromClassDocBlock($data);
+        $this->extractTags($data);
+    }
+    
+    /**
+     * Fetches markdown blocks from class docblocks.
+     *
+     * @param PostDocBlockExtractionEvent $data Event object 
+     * @return void
+     */
+    protected function fetchMarkdownFromClassDocBlock(PostDocBlockExtractionEvent $data)
+    {
+        $element = $data->getSubject();
         $package = $element->getDefaultPackageName();
         $class   = $element->getName();
 
@@ -124,51 +166,40 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
     }
 
     /**
-     * Checks all phpDocumentor whether they match the given rules.
+     * Checks all phpDocumentor tags whether they match the tags to collect.
      *
      * @param PostDocBlockExtractionEvent $data Event object containing the
      *     parameters.
      *
-     * @phpdoc-event reflection.docblock-extraction.post
-     *
      * @return void
      */
-    public function fetchSUMLFromClassBlock($data)
+    protected function extractTags(PostDocBlockExtractionEvent $data)
     {
-        /** @var $element \phpDocumentor\Reflection\BaseReflector */
-        $element = $data->getSubject();
-        if (!$element instanceof \phpDocumentor\Reflection\ClassReflector) {
-            return;
-        }
-
         /** @var $docblock \phpDocumentor\Reflection\DocBlock */
         $docblock = $data->getDocblock();
-        if (!$docblock->hasTag(self::SUML_BLOCK)) {
-            return;
-        }
-
-        $tags = $docblock->getTagsByName(self::SUML_BLOCK);
-        /* @var $tag \phpDocumentor\Reflection\DocBlock_Tag[] */
-        foreach ($tags as $tag) {
-            $suml = $tag->getContent();
+        
+        foreach (array_unique($this->collectedTagNames) as $tagName) {
+            if (!$docblock->hasTag($tagName)) {
+                continue;
+            }
+            
+            $tags = $docblock->getTagsByName($tagName);
+            /* @var $tag \phpDocumentor\Reflection\DocBlock_Tag[] */
+            foreach ($tags as $tag) {
+                $this->tags[$tagName][] = $tag;
+            }
         }
     }
 
     /**
-     * Loads all the configured writer in the given sequence and executes them.
+     * Executes all the configured writers in the given sequence.
      * 
      * @phpdoc-event transformer.transform.pre
      */
     public function runExports()
     {
-        $writers = $this->getConfiguredWriters();
-        foreach ($writers as $writerName) {
-            $writer = MdMan_Writer_Abstract::create($writerName);
-            $this->writers[$writerName] = $writer;
-            
-            $this->writers[$writerName]->setConfig($this);
-            $this->writers[$writerName]->setMarkdownTree($this);
-            $this->writers[$writerName]->execute();
+        foreach ($this->writers as $writer) {
+            $writer->execute();
         }
     }
     
@@ -220,10 +251,35 @@ class MdMan_Listener extends ListenerAbstract implements MdMan_MarkdownTree, MdM
     /**
      * Returns the used writers (non-empty after runExport has been called).
      * 
-     * @return array
+     * @return MdMan_Writer[]
      */
     public function getWriters()
     {
         return $this->writers;
     }
+    
+    /**
+     * Adds a tag name to the list of collected blocks.
+     * 
+     * @param string $tagName
+     */
+    public function collectTagsOfType($tagName)
+    {
+        $this->collectedTagNames[] = $tagName;
+    }
+
+    /**
+     * Returns the collected tags of a given name.
+     * 
+     * @param string $tagName
+     * @return \phpDocumentor\Reflection\DocBlock\Tag[]
+     */
+    public function getTagsOfType($tagName)
+    {
+        if (!isset($this->tags[$tagName])) {
+            return array();
+        }
+        return $this->tags[$tagName];
+    }
+
 }

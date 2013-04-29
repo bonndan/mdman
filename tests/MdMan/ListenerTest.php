@@ -74,7 +74,7 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
         $this->createConfig();
         $this->createPlugin();
         $this->createListener();
-        $this->listener->fetchMarkdownFromClassDocBlock($event);
+        $this->listener->handleClassBlockExtraction($event);
     }
 
     /**
@@ -95,7 +95,7 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
         $this->createListener();
         
         $event = $this->createEvent(null, $docblock);
-        $this->listener->fetchMarkdownFromClassDocBlock($event);
+        $this->listener->handleClassBlockExtraction($event);
     }
 
     /**
@@ -141,15 +141,15 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures the listener also implements the getTree methods for writers.
+     * Ensures the listener also implements the content provider methods for writers.
      * 
      */
-    public function testImplementsMarkdownTree()
+    public function testImplementsContentProvider()
     {
         $this->createConfig();
         $this->createPlugin();
         $this->createListener();
-        $this->assertInstanceOf('MdMan_MarkdownTree', $this->listener);
+        $this->assertInstanceOf('MdMan_ContentProvider', $this->listener);
         $this->assertInternalType('array', $this->listener->getTree());
     }
     
@@ -169,6 +169,45 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
         $mock = current($writers);
         $this->assertInstanceOf('WriterMock', $mock);
         $this->assertTrue($mock->executed);
+    }
+    
+    /**
+     * Ensures that a tag is appended to the list of collected tags.
+     */
+    public function testCollectTagsOfType()
+    {
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        $this->listener->collectTagsOfType('test');
+        $this->assertAttributeContains('test', 'collectedTagNames', $this->listener);
+    }
+    
+    /**
+     * Ensures the tags are really collected.
+     */
+    public function testTagsAreCollected()
+    {
+        $docblock = $this->createDocblock();
+        $docblock->expects($this->at(0))
+            ->method('hasTag')
+            ->will($this->returnValue(false));
+        $docblock->expects($this->at(1))
+            ->method('hasTag')
+            ->will($this->returnValue(true));
+        $tag = new stdClass;
+        $docblock->expects($this->any())
+            ->method('getTagsByName')
+            ->will($this->returnValue(array($tag)));
+        
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        $this->listener->collectTagsOfType('testTag');
+        
+        $event = $this->createEvent(null, $docblock);
+        $this->listener->handleClassBlockExtraction($event);
+        $this->assertNotEmpty($this->listener->getTagsOfType('testTag'));
     }
     
     /**
@@ -301,6 +340,7 @@ class WriterMock implements MdMan_Writer
     public $executed;
     public $config;
     public $tree;
+    public $contentProvider;
     
     public function execute()
     {
@@ -312,8 +352,8 @@ class WriterMock implements MdMan_Writer
         $this->config = $config;
     }
 
-    public function setMarkdownTree(\MdMan_MarkdownTree $tree)
+    public function setContentProvider(\MdMan_ContentProvider $contentProvider)
     {
-        $this->tree = $tree;
+        $this->contentProvider = $contentProvider;
     }
 }

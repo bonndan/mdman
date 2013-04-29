@@ -24,7 +24,7 @@ class MdMan_Writer_MdToC extends MdMan_Writer_Abstract
     {
         $contents = '';
         
-        $tree = $this->tree->getTree();
+        $tree = $this->contentProvider->getTree();
         foreach ($tree as $packageName => $package) {
             $contents .= "[$packageName][]" . PHP_EOL;
             foreach ($package as $className => $nil) {

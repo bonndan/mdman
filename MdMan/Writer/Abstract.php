@@ -15,10 +15,10 @@
 abstract class MdMan_Writer_Abstract implements MdMan_Writer
 {
     /**
-     * the markdown tree
-     * @var MdMan_MarkdownTree 
+     * the markdown content provider
+     * @var MdMan_ContentProvider 
      */
-    protected $tree;
+    protected $contentProvider;
     
     /**
      * the plugin configuration
@@ -56,11 +56,11 @@ abstract class MdMan_Writer_Abstract implements MdMan_Writer
     /**
      * Inject the markdown into the writer.
      * 
-     * @param \MdMan_MarkdownTree $tree
+     * @param MdMan_ContentProvider $contentProvider
      */
-    public function setMarkdownTree(MdMan_MarkdownTree $tree)
+    public function setContentProvider(MdMan_ContentProvider $contentProvider)
     {
-        $this->tree = $tree;
+        $this->contentProvider = $contentProvider;
     }
     
     /**
@@ -99,11 +99,4 @@ abstract class MdMan_Writer_Abstract implements MdMan_Writer
             throw new RuntimeException('Config is missing in writer.');
         }
     }
-    
-    /**
-     * Implement the execution function.
-     * 
-     * @param MdMan_Configuration $config
-     */
-    abstract public function execute();
 }

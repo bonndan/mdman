@@ -49,12 +49,12 @@ class MdMan_Writer_MarkdownTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue('testfile.md'));
         $this->writer->setConfig($configMock);
         
-        $tree = $this->getMock('MdMan_MarkdownTree');
-        $tree->expects($this->any())
+        $provider = $this->getMock('MdMan_ContentProvider');
+        $provider->expects($this->any())
             ->method('getTree')
             ->will($this->returnValue(array('apackage' => array('aclass' => 'Test'))));
         
-        $this->writer->setMarkdownTree($tree);
+        $this->writer->setContentProvider($provider);
         $this->writer->execute();
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * MdMan_MarkdownTree
+ * MdMan_ContentProvider
  * 
  * @package MdMan
  * @author  Daniel Pozzi <bonndan76@googlemail.com>
@@ -15,11 +15,11 @@
 interface MdMan_Writer
 {
     /**
-     * Inject a markdown tree.
+     * Inject a content provider
      * 
-     * @param MdMan_MarkdownTree $tree
+     * @param MdMan_ContentProvider $contentProvider
      */
-    public function setMarkdownTree(MdMan_MarkdownTree $tree);
+    public function setContentProvider(MdMan_ContentProvider $contentProvider);
     
     /**
      * Inject a config.

@@ -24,7 +24,7 @@ class MdMan_Writer_ByPackageAndClass extends MdMan_Writer_Abstract
     public function execute()
     {
         $contents = '';
-        $tree = $this->tree->getTree();
+        $tree = $this->contentProvider->getTree();
         foreach ($tree as $packageName => $package) {
             $contents .= PHP_EOL . PHP_EOL .'# ' . $packageName . ' #' . PHP_EOL;
             foreach ($package as $className => $class) {

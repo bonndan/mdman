@@ -49,13 +49,13 @@ class MdMan_Writer_AbstractTest extends PHPUnit_Framework_TestCase
     }
     
     /**
-     * Ensures the tree is injected properly
+     * Ensures the content provider is injected properly
      */
-    public function testInjectTree()
+    public function testInjectContentProvider()
     {
-        $tree = $this->getMock('MdMan_MarkdownTree');
-        $this->writer->setMarkdownTree($tree);
-        $this->assertAttributeEquals($tree, 'tree', $this->writer);
+        $provider = $this->getMock('MdMan_ContentProvider');
+        $this->writer->setContentProvider($provider);
+        $this->assertAttributeEquals($provider, 'contentProvider', $this->writer);
     }
 }
 

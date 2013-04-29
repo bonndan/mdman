@@ -50,12 +50,12 @@ original markdown";
         $this->writer->setConfig($configMock);
         
         $treeData = array('apackage' => array('aclass' => 'Test'));
-        $tree = $this->getMock('MdMan_MarkdownTree');
-        $tree->expects($this->any())
+        $provider = $this->getMock('MdMan_ContentProvider');
+        $provider->expects($this->any())
             ->method('getTree')
             ->will($this->returnValue($treeData));
         
-        $this->writer->setMarkdownTree($tree);
+        $this->writer->setContentProvider($provider);
         $this->writer->execute();
     }
     
