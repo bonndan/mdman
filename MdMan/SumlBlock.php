@@ -82,7 +82,7 @@ class MdMan_SumlBlock
                 $arg = trim($word, '[]');
                 $this->args[] = $arg;
             } else {
-                $this->destinationFile = $word;
+                $this->setDestinationFile($word);
             }
         }
     }
@@ -102,4 +102,21 @@ class MdMan_SumlBlock
         return $command;
     }
 
+    /**
+     * Set the destination file name.
+     * 
+     * Throws an exception if suml arrow heads are in the file name, which is
+     * a hint for wrong usage.
+     * 
+     * @param string $file
+     * @throws \RuntimeException
+     */
+    protected function setDestinationFile($file)
+    {
+        if (strpos($file, '<') !== false || strpos($file, '>')) {
+            throw new \RuntimeException('Invalid destination file: ' . $file);
+        }
+        
+        $this->destinationFile = $file;
+    }
 }
