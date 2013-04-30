@@ -96,7 +96,7 @@ class MdMan_SumlBlockTest extends PHPUnit_Framework_TestCase
         if ($block === null) {
             $block = $this->getDocBlock();
         }
-        $sumls = $block->getTagsByName(MdMan_Listener::SUML_BLOCK);
+        $sumls = $block->getTagsByName(MdMan_Writer_Suml::SUML_BLOCK);
         return current($sumls);
     }
     

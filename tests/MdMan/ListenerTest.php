@@ -184,6 +184,19 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
     }
     
     /**
+     * Ensures an empty array is returns when no tags have been collected.
+     */
+    public function testGetTagsOfTypeReturnsEmptyArray()
+    {
+        $this->createConfig();
+        $this->createPlugin();
+        $this->createListener();
+        $tags = $this->listener->getTagsOfType('test');
+        $this->assertInternalType('array', $tags); 
+        $this->assertEmpty($tags); 
+    }
+    
+    /**
      * Ensures the tags are really collected.
      */
     public function testTagsAreCollected()

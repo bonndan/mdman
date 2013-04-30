@@ -21,11 +21,6 @@ use \phpDocumentor\Reflection\Event\PostDocBlockExtractionEvent;
 class MdMan_Listener extends ListenerAbstract implements MdMan_ContentProvider, MdMan_Configuration
 {
     /**
-     * suml annotations
-     */
-    const SUML_BLOCK = "suml";
-    
-    /**
      * plugin path to identify the plugin, assumes composer installation
      */
     const CONFIG_PLUGIN_PATH = 'vendor/bonndan/MdMan';
