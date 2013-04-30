@@ -32,7 +32,7 @@ interface MdMan_ContentProvider
      * Returns the blocks of a certain type.
      * 
      * @param string $tagName
-     * @return array
+     * @return \phpDocumentor\Reflection\DocBlock\Tag[]
      */
     public function getTagsOfType($tagName);
 }
