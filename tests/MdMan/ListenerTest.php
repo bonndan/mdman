@@ -188,18 +188,11 @@ class MdMan_ListenerTest extends PHPUnit_Framework_TestCase
      */
     public function testTagsAreCollected()
     {
-        $docblock = $this->createDocblock();
-        $docblock->expects($this->at(0))
-            ->method('hasTag')
-            ->will($this->returnValue(false));
-        $docblock->expects($this->at(1))
-            ->method('hasTag')
-            ->will($this->returnValue(true));
-        $tag = new stdClass;
-        $docblock->expects($this->any())
-            ->method('getTagsByName')
-            ->will($this->returnValue(array($tag)));
-        
+        $docblock = new \phpDocumentor\Reflection\DocBlock("/**
+ * a doc block
+ *
+ * @testTag some input 
+ */");
         $this->createConfig();
         $this->createPlugin();
         $this->createListener();
